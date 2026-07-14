@@ -3,6 +3,8 @@ package com.sak.wifi.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name="companies")
 @Getter
@@ -24,5 +26,17 @@ public class Company {
 
     private String phone;
     private String address;
+
+    @Column(nullable = false)
+    private boolean isVerified;
+
+    @Column(nullable = false,updatable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        createdAt = LocalDateTime.now();
+    }
+
 
 }

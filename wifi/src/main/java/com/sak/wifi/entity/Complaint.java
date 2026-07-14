@@ -33,9 +33,11 @@ public class Complaint {
     @Enumerated(EnumType.STRING)
     private ComplaintPriority priority;
 
-    @Column(nullable = false)
-    private Long customerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id")
+    private Customer customer;
 
-    @Column(nullable = false)
-    private Long companyId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 }
