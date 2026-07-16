@@ -1,5 +1,7 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.dto.LoginRequest;
+import com.sak.wifi.dto.LoginResponse;
 import com.sak.wifi.dto.RegisterUserRequest;
 import com.sak.wifi.entity.Company;
 import com.sak.wifi.entity.Role;
@@ -8,6 +10,8 @@ import com.sak.wifi.exception.ResourceAlreadyExistsException;
 import com.sak.wifi.repository.CompanyRepository;
 import com.sak.wifi.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +22,8 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CompanyRepository companyRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     public void registerUser(RegisterUserRequest request){
 
@@ -46,6 +52,20 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+    }
+
+    public LoginResponse login(LoginRequest request){
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getEmail(),
+                        request.getPassword()
+                )
+        );
+        User user= userRepository.findByEmail(request.getEmail()).orElseThrow();
+
+        String token= jwtService.generateToken(user);
+
+        return new LoginResponse(token);
     }
 
 }
