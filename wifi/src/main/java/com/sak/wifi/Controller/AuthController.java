@@ -1,5 +1,7 @@
 package com.sak.wifi.Controller;
 
+import com.sak.wifi.dto.LoginRequest;
+import com.sak.wifi.dto.LoginResponse;
 import com.sak.wifi.dto.RegisterUserRequest;
 import com.sak.wifi.service.AuthService;
 import jakarta.validation.Valid;
@@ -27,5 +29,15 @@ public class AuthController {
         authService.registerUser(request);
 
         return ResponseEntity.ok("User Registered Successfully");
-    };
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse>
+    login(
+            @RequestBody
+            LoginRequest request
+    ){
+        return ResponseEntity.ok(authService.login(request));
+    }
+
 }
