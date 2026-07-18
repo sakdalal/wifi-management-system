@@ -1,9 +1,8 @@
 package com.sak.wifi.service;
 
-import com.sak.wifi.dto.LoginRequest;
-import com.sak.wifi.dto.LoginResponse;
-import com.sak.wifi.dto.RegisterUserRequest;
+import com.sak.wifi.dto.*;
 import com.sak.wifi.entity.Company;
+import com.sak.wifi.entity.RefreshToken;
 import com.sak.wifi.entity.Role;
 import com.sak.wifi.entity.User;
 import com.sak.wifi.exception.ResourceAlreadyExistsException;
@@ -24,6 +23,7 @@ public class AuthService {
     private final CompanyRepository companyRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final RefreshTokenService refreshTokenService;
 
     public void registerUser(RegisterUserRequest request){
 
@@ -54,18 +54,47 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public LoginResponse login(LoginRequest request){
+    public LoginResponse login(LoginRequest request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
                         request.getPassword()
                 )
         );
-        User user= userRepository.findByEmail(request.getEmail()).orElseThrow();
+        User user = userRepository.findByEmail(request.getEmail()).orElseThrow();
 
-        String token= jwtService.generateToken(user);
+        String accessToken = jwtService.generateAccessToken(user);
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
 
-        return new LoginResponse(token);
+
+        return LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .build();
+    }
+
+    public LoginResponse refreshToken(RefreshRequest request){
+
+        String refreshToken = request.getRefreshToken();
+
+        RefreshToken refreshToken1= refreshTokenService.findByToken(refreshToken)
+                .orElseThrow(()->new RuntimeException("Invalid Refresh Token "));
+
+        refreshTokenService.verifyExpiration(refreshToken1);
+
+        User user= refreshToken1.getUser();
+
+        String accessToken = jwtService.generateAccessToken(user);
+
+        return  LoginResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken1.getToken())
+                .build();
+
+    }
+
+    public void logout(User user){
+        refreshTokenService.deleteByUser(user);
     }
 
 }
