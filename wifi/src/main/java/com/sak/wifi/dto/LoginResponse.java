@@ -1,10 +1,13 @@
 package com.sak.wifi.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
+@Setter
+@Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class LoginResponse {
-    private String token;
+    private String accessToken;
+    private String refreshToken;
 }
