@@ -45,6 +45,10 @@ public class SecurityConfig {
                                 "/auth/**"
                         )
                         .permitAll()
+                        .requestMatchers("/auth/forgot-password",
+                                "/auth/reset-password",
+                                "/auth/verify-email")
+                        .permitAll()
                         .requestMatchers("/super-admin/**")
                         .hasRole("SUPER_ADMIN")
                         .requestMatchers("/company/**")
