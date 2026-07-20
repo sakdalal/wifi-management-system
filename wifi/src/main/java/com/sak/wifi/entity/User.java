@@ -3,6 +3,8 @@ package com.sak.wifi.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name="users")
 @Getter
@@ -28,7 +30,19 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private boolean isEnabled;
+    @Enumerated(EnumType.STRING)
+    private AccountStatus status;
+
+    private String verificationToken;
+    private LocalDateTime verificationExpiry;
+    private int failedLoginAttempts;
+    private LocalDateTime lockTime;
+
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "reset_password_expiry")
+    private LocalDateTime resetPasswordExpiry;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")

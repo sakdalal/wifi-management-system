@@ -57,6 +57,25 @@ public class JwtService {
                 .compact();
     }
 
+    public String generateAccessToken(User user){
+        return Jwts.builder()
+                .subject(user.getEmail())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis()+900000))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+    public String generateRefreshToken(User user){
+        return  Jwts.builder()
+                .subject(user.getEmail())
+                .issuedAt(new Date())
+                .expiration(new Date(System.currentTimeMillis()+604800000))
+                .signWith(getSigningKey())
+                .compact();
+    }
+
+
     public String extractUsername(String token){
         return extractAllClaims(token).getSubject();
     }
