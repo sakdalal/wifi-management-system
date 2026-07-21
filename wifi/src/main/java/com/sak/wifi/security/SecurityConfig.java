@@ -59,6 +59,8 @@ public class SecurityConfig {
                         .hasRole("CUSTOMER")
                         .requestMatchers("/test/**")
                         .authenticated()
+                        .requestMatchers("/customers/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
