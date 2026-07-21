@@ -48,5 +48,7 @@ public class Customer {
     @JoinColumn(name = "plan_id")
     private Plan plan;
 
+    private String profileImageUrl;
+
 
 }
