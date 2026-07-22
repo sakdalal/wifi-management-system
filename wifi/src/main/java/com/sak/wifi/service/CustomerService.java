@@ -57,7 +57,7 @@ public class CustomerService {
 
     public CustomerResponseDTO getCustomer(Long id){
         Customer customer=customerRepository.findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("Customer Not Found"));
+                .orElseThrow(()->new ResourceNotFoundException("Customer Not Found with id: "+id));
 
         return mapToResponse(customer);
     }
