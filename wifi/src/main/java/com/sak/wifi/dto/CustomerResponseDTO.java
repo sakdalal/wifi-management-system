@@ -4,15 +4,13 @@ import com.sak.wifi.entity.CustomerStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 
-@Setter
-@Getter
-@Builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CustomerResponseDTO {
 
     private Long id;
@@ -29,7 +27,6 @@ public class CustomerResponseDTO {
 
     private LocalDate installationDate;
 
-    private String profileImageUrl;
-
     private Long companyId;
+
 }

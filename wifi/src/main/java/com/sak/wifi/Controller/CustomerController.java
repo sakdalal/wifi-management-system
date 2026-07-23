@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.naming.Name;
 import java.util.List;
 
 @RestController
@@ -58,6 +59,27 @@ public class CustomerController {
             @RequestBody CustomerRequestDTO request
     ){
         return ResponseEntity.ok(customerService.updateCustomer(id,request));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<CustomerResponseDTO>> searchCustomer(
+            @RequestParam String keyword
+    ){
+        return ResponseEntity.ok(
+                customerService.searchCustomers(keyword)
+        );
+    }
+
+    @GetMapping("/find")
+    public ResponseEntity<List<CustomerResponseDTO>> findCustomers(
+            @RequestParam(required = false)
+            CustomerStatus status,
+            @RequestParam(required = false)
+            Long companyId
+    ){
+        return ResponseEntity.ok(
+                customerService.findCustomers(status,companyId)
+        );
     }
 
 }
