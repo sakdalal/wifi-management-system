@@ -1,15 +1,19 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.config.ModelMapperConfig;
 import com.sak.wifi.dto.CustomerRequestDTO;
 import com.sak.wifi.dto.CustomerResponseDTO;
 import com.sak.wifi.entity.Company;
 import com.sak.wifi.entity.Customer;
+import com.sak.wifi.entity.CustomerStatus;
 import com.sak.wifi.exception.ResourceNotFoundException;
 import com.sak.wifi.repository.CompanyRepository;
 import com.sak.wifi.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import javax.naming.Name;
 import java.util.List;
 
 @Service
@@ -18,54 +22,41 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CompanyRepository companyRepository;
+    private final ModelMapper mapper;
 
     public CustomerResponseDTO createCustomer(CustomerRequestDTO request){
 
-        Company company=companyRepository.findById(request.getCompanyId())
-                .orElseThrow(()->new ResourceNotFoundException("Company Not Found"));
+        Company company = companyRepository.findById(request.getCompanyId())
+                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
 
-        Customer customer= Customer.builder()
-                .name(request.getName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .installationDate(request.getInstallationDate())
-                .profileImageUrl(request.getProfileImageUrl())
-                .status(request.getStatus())
-                .company(company)
-                .build();
 
-        customer= customerRepository.save(customer);
+        Customer customer = new Customer();
+        customer.setName(request.getName());
+        customer.setEmail(request.getEmail());
+        customer.setPhone(request.getPhone());
+        customer.setAddress(request.getAddress());
+        customer.setStatus(request.getStatus());
+        customer.setInstallationDate(request.getInstallationDate());
+        customer.setProfileImageUrl(request.getProfileImageUrl());
+        customer.setCompany(company);
 
-        return mapToResponse(customer);
+        Customer saved= customerRepository.save(customer);
+
+        return mapper.map(saved,CustomerResponseDTO.class);
     }
 
-    private CustomerResponseDTO mapToResponse(Customer customer){
-
-        return CustomerResponseDTO.builder()
-                .id(customer.getId())
-                .name(customer.getName())
-                .email(customer.getEmail())
-                .address(customer.getAddress())
-                .phone(customer.getPhone())
-                .status(customer.getStatus())
-                .installationDate(customer.getInstallationDate())
-                .profileImageUrl(customer.getProfileImageUrl())
-                .companyId(customer.getCompany().getId())
-                .build();
-    }
 
     public CustomerResponseDTO getCustomer(Long id){
         Customer customer=customerRepository.findById(id)
                 .orElseThrow(()->new ResourceNotFoundException("Customer Not Found with id: "+id));
 
-        return mapToResponse(customer);
+        return mapper.map(customer,CustomerResponseDTO.class);
     }
 
     public List<CustomerResponseDTO> getAllCustomer(){
         return customerRepository.findAll()
                 .stream()
-                .map(this::mapToResponse)
+                .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
                 .toList();
     }
 
@@ -91,8 +82,36 @@ public class CustomerService {
 
         customer=customerRepository.save(customer);
 
-        return mapToResponse(customer);
+        return mapper.map(customer,CustomerResponseDTO.class);
 
+
+    }
+
+    public List<CustomerResponseDTO> searchCustomers(String keyword){
+
+        return customerRepository.findByNameContainingIgnoreCase(keyword)
+                .stream()
+                .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
+                .toList();
+    }
+
+    public List<CustomerResponseDTO> findCustomers(CustomerStatus status, Long companyId){
+
+        List<Customer> customers;
+
+        if(status!=null && companyId!=null){
+            customers=customerRepository.findByStatusAndCompanyId(status,companyId);
+        } else if (status!=null) {
+            customers=customerRepository.findByStatus(status);
+        } else if (companyId!=null) {
+            customers=customerRepository.findByCompanyId(companyId);
+        } else {
+            customers=customerRepository.findAll();
+        }
+
+        return customers.stream()
+                .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
+                .toList();
 
     }
 
