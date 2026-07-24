@@ -2,6 +2,7 @@ package com.sak.wifi.Controller;
 
 import com.sak.wifi.dto.CustomerRequestDTO;
 import com.sak.wifi.dto.CustomerResponseDTO;
+import com.sak.wifi.dto.PageResponseDTO;
 import com.sak.wifi.entity.CustomerStatus;
 import com.sak.wifi.service.CustomerService;
 import jakarta.validation.Valid;
@@ -39,9 +40,14 @@ public class CustomerController {
     }
 
     @GetMapping
-    public  ResponseEntity<List<CustomerResponseDTO>> getAllCustomers(){
+    public  ResponseEntity<PageResponseDTO<CustomerResponseDTO>> getAllCustomers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String direction
+    ){
         return ResponseEntity.ok(
-                customerService.getAllCustomer()
+                customerService.getAllCustomer(page,size,sortBy,direction)
         );
     }
 
