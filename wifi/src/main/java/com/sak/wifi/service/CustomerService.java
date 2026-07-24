@@ -3,6 +3,7 @@ package com.sak.wifi.service;
 import com.sak.wifi.config.ModelMapperConfig;
 import com.sak.wifi.dto.CustomerRequestDTO;
 import com.sak.wifi.dto.CustomerResponseDTO;
+import com.sak.wifi.dto.PageResponseDTO;
 import com.sak.wifi.entity.Company;
 import com.sak.wifi.entity.Customer;
 import com.sak.wifi.entity.CustomerStatus;
@@ -11,6 +12,10 @@ import com.sak.wifi.repository.CompanyRepository;
 import com.sak.wifi.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import javax.naming.Name;
@@ -53,11 +58,32 @@ public class CustomerService {
         return mapper.map(customer,CustomerResponseDTO.class);
     }
 
-    public List<CustomerResponseDTO> getAllCustomer(){
-        return customerRepository.findAll()
+    public PageResponseDTO<CustomerResponseDTO> getAllCustomer(int page,
+                                                               int size,
+                                                               String sortBy,
+                                                               String direction){
+
+        Sort sort=direction.equalsIgnoreCase("desc")
+                    ? Sort.by(sortBy).descending()
+                    : Sort.by(sortBy).ascending();
+
+        Pageable pageable= PageRequest.of(page,size,sort);
+
+        Page<Customer> customerPage=customerRepository.findAll(pageable);
+
+        List<CustomerResponseDTO> customers=customerPage
+                .getContent()
                 .stream()
                 .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
                 .toList();
+
+        return new PageResponseDTO<>(
+                customers,
+                customerPage.getNumber(),
+                customerPage.getTotalPages(),
+                customerPage.getTotalElements(),
+                customerPage.getSize()
+        );
     }
 
     public void deleteCustomer(Long id){
