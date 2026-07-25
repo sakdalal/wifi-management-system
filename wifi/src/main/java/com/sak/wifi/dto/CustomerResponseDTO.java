@@ -19,13 +19,9 @@ public class CustomerResponseDTO {
 
     private String email;
 
-    private String address;
-
-    private String phone;
-
     private CustomerStatus status;
 
-    private LocalDate installationDate;
+    private String profileImageUrl;
 
     private Long companyId;
 
