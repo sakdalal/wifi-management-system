@@ -1,6 +1,5 @@
 package com.sak.wifi.service;
 
-import com.sak.wifi.config.ModelMapperConfig;
 import com.sak.wifi.dto.CustomerRequestDTO;
 import com.sak.wifi.dto.CustomerResponseDTO;
 import com.sak.wifi.dto.PageResponseDTO;
@@ -12,13 +11,17 @@ import com.sak.wifi.repository.CompanyRepository;
 import com.sak.wifi.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import java.nio.file.Files;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.Name;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -138,6 +141,44 @@ public class CustomerService {
         return customers.stream()
                 .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
                 .toList();
+
+    }
+
+    public CustomerResponseDTO uploadImage(Long id, MultipartFile file){
+
+        Customer customer= customerRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("Customer not found"));
+
+        if(file.isEmpty()){
+            throw new RuntimeException("File is empty");
+        }
+
+        if(!file.getContentType().equals("image/png") &&
+                !file.getContentType().equals("image/jpeg")){
+            throw new RuntimeException("Only PNG and JPEG files allowed");
+        }
+
+        if(file.getSize()> 2*1024*1024){
+            throw new RuntimeException("Max size 2MB");
+        }
+
+        try{
+
+            String fileName= System.currentTimeMillis()+"_"+file.getOriginalFilename();
+            Path uploadPath= Paths.get("uploads");
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+            Path filePath=uploadPath.resolve(fileName);
+            file.transferTo(filePath);
+            customer.setProfileImageUrl("/uploads/"+fileName);
+            customerRepository.save(customer);
+            return mapper.map(customer,CustomerResponseDTO.class);
+
+
+        } catch (Exception e) {
+            throw new RuntimeException("Image upload failed");
+        }
 
     }
 

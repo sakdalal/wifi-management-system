@@ -7,8 +7,10 @@ import com.sak.wifi.entity.CustomerStatus;
 import com.sak.wifi.service.CustomerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.naming.Name;
 import java.util.List;
@@ -86,6 +88,17 @@ public class CustomerController {
         return ResponseEntity.ok(
                 customerService.findCustomers(status,companyId)
         );
+    }
+
+    @PostMapping(
+            value="/{id}/upload-image",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public CustomerResponseDTO uploadImage(
+            @PathVariable Long id,
+            @RequestParam("file")MultipartFile file
+            ){
+
+        return customerService.uploadImage(id,file);
     }
 
 }
