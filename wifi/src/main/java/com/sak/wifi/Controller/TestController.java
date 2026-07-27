@@ -2,9 +2,7 @@ package com.sak.wifi.Controller;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/test")
@@ -15,6 +13,12 @@ public class TestController {
     @GetMapping
     public String test(){
         return "Protected ApI working";
+    }
+
+    @PostMapping
+    public String test(@RequestBody String body) {
+        System.out.println(body);
+        return "OK";
     }
 
     @GetMapping("/me")
