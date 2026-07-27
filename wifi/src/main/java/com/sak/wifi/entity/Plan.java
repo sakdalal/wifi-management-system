@@ -37,6 +37,6 @@ public class Plan {
     @JoinColumn(name="company_id")
     private Company company;
 
-    @Column(nullable = false)
-    private boolean isActive;
+    @Column(name="active",nullable = false)
+    private boolean active= false;
 }

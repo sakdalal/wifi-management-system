@@ -1,9 +1,12 @@
 package com.sak.wifi.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="companies")
@@ -28,7 +31,7 @@ public class Company {
     private String address;
 
     @Column(nullable = false)
-    private boolean isVerified;
+    private boolean isVerified=false;
 
     @Column(nullable = false,updatable = false)
     private LocalDateTime createdAt;
@@ -37,6 +40,14 @@ public class Company {
     public void prePersist() {
         createdAt = LocalDateTime.now();
     }
+
+    @JsonIgnore
+    @OneToMany(
+            mappedBy = "company",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<Plan> plans= new ArrayList<>();
 
 
 }
