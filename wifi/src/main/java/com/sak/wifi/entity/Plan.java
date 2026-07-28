@@ -39,4 +39,7 @@ public class Plan {
 
     @Column(name="active",nullable = false)
     private boolean active= false;
+
+    @Enumerated(EnumType.STRING)
+    private PlanStatus planStatus;
 }

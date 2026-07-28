@@ -101,4 +101,31 @@ public class CustomerController {
         return customerService.uploadImage(id,file);
     }
 
+    @PutMapping("/{customerId}/assign-plan/{planId}")
+    public ResponseEntity<CustomerResponseDTO> assignPlan(
+            @PathVariable Long customerId,
+            @PathVariable Long planId
+    ){
+        return ResponseEntity.ok(customerService.assignPlan(customerId,planId));
+
+    }
+
+    @PutMapping("/{customerId}/upgrade-plan/{planId}")
+    public ResponseEntity<CustomerResponseDTO> upgradePlan(
+            @PathVariable Long customerId,
+            @PathVariable Long planId
+    ){
+        return ResponseEntity.ok(customerService.upgradePlan(customerId,planId));
+
+    }
+
+    @PutMapping("/{customerId}/downgrade-plan/{planId}")
+    public ResponseEntity<CustomerResponseDTO> downgradePlan(
+            @PathVariable Long customerId,
+            @PathVariable Long planId
+    ){
+        return ResponseEntity.ok(customerService.downgradePlan(customerId,planId));
+
+    }
+
 }

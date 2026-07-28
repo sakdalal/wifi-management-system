@@ -3,14 +3,15 @@ package com.sak.wifi.service;
 import com.sak.wifi.dto.CustomerRequestDTO;
 import com.sak.wifi.dto.CustomerResponseDTO;
 import com.sak.wifi.dto.PageResponseDTO;
-import com.sak.wifi.entity.Company;
-import com.sak.wifi.entity.Customer;
-import com.sak.wifi.entity.CustomerStatus;
+import com.sak.wifi.entity.*;
 import com.sak.wifi.exception.ResourceNotFoundException;
 import com.sak.wifi.repository.CompanyRepository;
 import com.sak.wifi.repository.CustomerRepository;
+import com.sak.wifi.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -30,6 +31,7 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final CompanyRepository companyRepository;
+    private final PlanRepository planRepository;
     private final ModelMapper mapper;
 
     public CustomerResponseDTO createCustomer(CustomerRequestDTO request){
@@ -179,6 +181,111 @@ public class CustomerService {
         } catch (Exception e) {
             throw new RuntimeException("Image upload failed");
         }
+
+    }
+
+
+    public CustomerResponseDTO assignPlan(Long customerId, Long planId){
+
+        Customer customer= customerRepository.findById(customerId)
+                .orElseThrow(()->new RuntimeException("Customer Not Found"));
+
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(()->new RuntimeException("No such plan exists"));
+
+        if(plan.getPlanStatus()!= PlanStatus.ACTIVE){
+            throw new IllegalArgumentException("Only active plans can be assigned");
+        }
+
+        if(customer.getPlan()!=null &&
+                customer.getPlan().getId().equals(planId)){
+            throw new IllegalArgumentException("Customer already has this plan");
+        }
+
+        customer.setPlan(plan);
+        Customer saved=customerRepository.save(customer);
+
+        CustomerResponseDTO dto= mapper.map(saved, CustomerResponseDTO.class);
+        if(customer.getPlan()!=null){
+            dto.setCurrentPlan(customer.getPlan().getPlanName());
+            dto.setSpeed(customer.getPlan().getSpeedMbps());
+            dto.setPrice(customer.getPlan().getPrice());
+        }
+        return dto;
+
+    }
+
+    public CustomerResponseDTO upgradePlan(Long customerId, Long planId){
+
+        Customer customer= customerRepository.findById(customerId)
+                .orElseThrow(()->new RuntimeException("Customer Not Found"));
+
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(()->new RuntimeException("No such plan exists"));
+
+        if(plan.getPlanStatus()!= PlanStatus.ACTIVE){
+            throw new IllegalArgumentException("Only active plans can be assigned");
+        }
+
+        if(customer.getPlan()!=null &&
+                customer.getPlan().getId().equals(planId)){
+            throw new IllegalArgumentException("Customer already has this plan");
+        }
+
+        BigDecimal currentPrice= customer.getPlan().getPrice();
+        BigDecimal newPrice=plan.getPrice();
+
+        if(newPrice.compareTo(currentPrice)<=0){
+            throw new IllegalArgumentException("Upgrade can only happen to a higher priced plan");
+        }
+
+        customer.setPlan(plan);
+        Customer saved=customerRepository.save(customer);
+
+        CustomerResponseDTO dto= mapper.map(saved, CustomerResponseDTO.class);
+        if(customer.getPlan()!=null){
+            dto.setCurrentPlan(customer.getPlan().getPlanName());
+            dto.setSpeed(customer.getPlan().getSpeedMbps());
+            dto.setPrice(customer.getPlan().getPrice());
+        }
+        return dto;
+
+    }
+
+    public CustomerResponseDTO downgradePlan(Long customerId, Long planId){
+
+        Customer customer= customerRepository.findById(customerId)
+                .orElseThrow(()->new RuntimeException("Customer Not Found"));
+
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(()->new RuntimeException("No such plan exists"));
+
+        if(plan.getPlanStatus()!= PlanStatus.ACTIVE){
+            throw new IllegalArgumentException("Only active plans can be assigned");
+        }
+
+        if(customer.getPlan()!=null &&
+                customer.getPlan().getId().equals(planId)){
+            throw new IllegalArgumentException("Customer already has this plan");
+        }
+
+        BigDecimal currentPrice= customer.getPlan().getPrice();
+        BigDecimal newPrice=plan.getPrice();
+
+        if(newPrice.compareTo(currentPrice)>=0){
+            throw new IllegalArgumentException("Upgrade can only happen to a higher priced plan");
+        }
+
+        customer.setPlan(plan);
+        Customer saved=customerRepository.save(customer);
+
+        CustomerResponseDTO dto= mapper.map(saved, CustomerResponseDTO.class);
+        if(customer.getPlan()!=null){
+            dto.setCurrentPlan(customer.getPlan().getPlanName());
+            dto.setSpeed(customer.getPlan().getSpeedMbps());
+            dto.setPrice(customer.getPlan().getPrice());
+        }
+        return dto;
 
     }
 
