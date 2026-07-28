@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -24,5 +25,11 @@ public class CustomerResponseDTO {
     private String profileImageUrl;
 
     private Long companyId;
+
+    private String currentPlan;
+
+    private Integer speed;
+
+    private BigDecimal price;
 
 }
