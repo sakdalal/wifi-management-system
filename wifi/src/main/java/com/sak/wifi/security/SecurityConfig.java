@@ -63,6 +63,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/plans/**")
                         .permitAll()
+                        .requestMatchers("/bills/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
