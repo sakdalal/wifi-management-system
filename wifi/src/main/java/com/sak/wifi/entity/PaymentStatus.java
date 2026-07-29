@@ -1,7 +1,7 @@
 package com.sak.wifi.entity;
 
 public enum PaymentStatus {
-    SUCCESS,
+    PAID,
     PENDING,
-    FAILED
+    OVERDUE
 }
