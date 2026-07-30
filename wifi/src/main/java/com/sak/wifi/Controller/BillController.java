@@ -2,9 +2,13 @@ package com.sak.wifi.Controller;
 
 import com.sak.wifi.dto.BillResponseDTO;
 import com.sak.wifi.service.BillService;
+import com.sak.wifi.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 
 import java.util.List;
 
@@ -14,6 +18,7 @@ import java.util.List;
 public class BillController {
 
     private final BillService billService;
+    private final InvoiceService invoiceService;
 
     @PostMapping("/generate/{customerId}")
     public ResponseEntity<BillResponseDTO> generateBill(
@@ -39,6 +44,18 @@ public class BillController {
             @PathVariable Long billId
     ){
         return ResponseEntity.ok(billService.payBill(billId));
+    }
+
+    @GetMapping("/{id}/invoice")
+    public ResponseEntity<byte[]> downloadInvoice(
+            @PathVariable Long id
+    ){
+        byte[] pdf= invoiceService.generateInvoicePdf(id);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=invoice.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
     }
 
 }
