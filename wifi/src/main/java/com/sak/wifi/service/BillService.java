@@ -1,10 +1,7 @@
 package com.sak.wifi.service;
 
 import com.sak.wifi.dto.BillResponseDTO;
-import com.sak.wifi.entity.Bill;
-import com.sak.wifi.entity.Customer;
-import com.sak.wifi.entity.PaymentStatus;
-import com.sak.wifi.entity.Plan;
+import com.sak.wifi.entity.*;
 import com.sak.wifi.exception.ResourceNotFoundException;
 import com.sak.wifi.repository.BillRepository;
 import com.sak.wifi.repository.CustomerRepository;
@@ -12,9 +9,11 @@ import com.sak.wifi.repository.PlanRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 @Service
@@ -80,5 +79,34 @@ public class BillService {
         return modelMapper.map(bill, BillResponseDTO.class);
 
     }
+
+
+    @Transactional
+    public void generateMonthlyBills(){
+
+        List<Customer> customers = customerRepository.findByStatus(CustomerStatus.ACTIVE);
+        String billingMonth= YearMonth.now().toString();
+
+        for(Customer customer:customers){
+            boolean exists=billRepository.existsByCustomerIdAndBillingMonth(customer.getId(),billingMonth);
+
+            if(exists)
+                continue;
+
+            Bill bill=Bill.builder()
+                    .customer(customer)
+                    .plan(customer.getPlan())
+                    .amount(customer.getPlan().getPrice())
+                    .billingDate(LocalDate.now())
+                    .billingMonth(billingMonth)
+                    .dueDate(LocalDate.now().plusDays(15))
+                    .paymentStatus(PaymentStatus.PENDING)
+                    .build();
+
+            billRepository.save(bill);
+        }
+
+    }
+
 
 }
