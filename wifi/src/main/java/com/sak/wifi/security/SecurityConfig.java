@@ -65,6 +65,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/bills/**")
                         .permitAll()
+                        .requestMatchers("/complaints/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated()
                 )

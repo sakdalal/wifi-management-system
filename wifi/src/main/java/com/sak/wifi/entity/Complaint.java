@@ -21,14 +21,14 @@ public class Complaint {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column(columnDefinition = "TEXT",nullable = false)
     private String description;
 
     @Enumerated(EnumType.STRING)
     private ComplaintStatus status;
 
     private LocalDateTime createdAt;
-    private LocalDateTime resolvedAt;
+    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     private ComplaintPriority priority;
@@ -40,4 +40,18 @@ public class Complaint {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
+
+    private String assignedEmployee;
+
+    @PrePersist
+    public void prePersist(){
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    public void preUpdate(){
+        updatedAt = LocalDateTime.now();
+    }
+
 }
