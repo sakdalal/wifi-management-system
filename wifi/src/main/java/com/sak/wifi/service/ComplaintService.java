@@ -1,18 +1,25 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.dto.AssignEmployeeRequestDTO;
 import com.sak.wifi.dto.ComplaintRequestDTO;
 import com.sak.wifi.dto.ComplaintResponseDTO;
+import com.sak.wifi.dto.UpdateComplaintStatusDTO;
 import com.sak.wifi.entity.Complaint;
 import com.sak.wifi.entity.ComplaintStatus;
 import com.sak.wifi.entity.Customer;
+import com.sak.wifi.entity.Employee;
 import com.sak.wifi.exception.ResourceNotFoundException;
 import com.sak.wifi.repository.ComplaintRepository;
 import com.sak.wifi.repository.CustomerRepository;
+import com.sak.wifi.repository.EmployeeRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +27,7 @@ public class ComplaintService {
 
     private final ComplaintRepository complaintRepository;
     private final CustomerRepository customerRepository;
+    private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
 
     public ComplaintResponseDTO createComplaint(ComplaintRequestDTO request){
@@ -36,7 +44,6 @@ public class ComplaintService {
         complaint.setDescription(request.getDescription());
         complaint.setStatus(ComplaintStatus.OPEN);
         complaint.setPriority(request.getPriority());
-        complaint.setAssignedEmployee(request.getAssignedEmployee());
         System.out.println("Complaint ID = " + complaint.getId());
         System.out.println("Customer ID = " + complaint.getCustomer().getId());
         System.out.println("Company = " + complaint.getCompany());
@@ -78,7 +85,6 @@ public class ComplaintService {
         complaint.setTitle(request.getTitle());
         complaint.setDescription(request.getDescription());
         complaint.setPriority(request.getPriority());
-        complaint.setAssignedEmployee(request.getAssignedEmployee());
         complaint.setCustomer(customer);
         Complaint updatedComplaint= complaintRepository.save(complaint);
 
@@ -107,6 +113,55 @@ public class ComplaintService {
                 complaint.getCustomer().getName());
 
         return dto;
+    }
+
+    @Transactional
+    public ComplaintResponseDTO assignEmployee(Long complainId,
+                                               AssignEmployeeRequestDTO request){
+
+        Complaint complaint=complaintRepository.findById(complainId)
+                .orElseThrow(()->new ResourceNotFoundException("No such complaint exist"));
+
+        Employee employee= employeeRepository.findById(request.getEmployeeId())
+                .orElseThrow(()->new ResourceNotFoundException("No such Employee found"));
+
+        complaint.setAssignedEmployee(employee);
+        complaint.setStatus(ComplaintStatus.ASSIGNED);
+
+        Complaint saved=complaintRepository.save(complaint);
+
+        return modelMapper.map(saved, ComplaintResponseDTO.class);
+    }
+
+    @Transactional
+    public ComplaintResponseDTO updateStatus(Long complainId,
+                                               UpdateComplaintStatusDTO request){
+
+        Complaint complaint=complaintRepository.findById(complainId)
+                .orElseThrow(()->new ResourceNotFoundException("No such complaint exist"));
+
+        complaint.setStatus(request.getStatus());
+
+        Complaint saved=complaintRepository.save(complaint);
+
+        return modelMapper.map(saved, ComplaintResponseDTO.class);
+    }
+
+    public List<ComplaintResponseDTO> getComplaintByStatus(ComplaintStatus status){
+
+        return complaintRepository.findByStatus(status)
+                .stream()
+                .map(complaint -> modelMapper.map(complaint, ComplaintResponseDTO.class))
+                .toList();
+    }
+
+    public Map<String,Long> dashboardCounts(){
+        Map<String,Long> counts = new HashMap<>();
+        counts.put("Open",complaintRepository.countByStatus(ComplaintStatus.OPEN));
+        counts.put("Resolved",complaintRepository.countByStatus(ComplaintStatus.RESOLVED));
+        counts.put("Assigned",complaintRepository.countByStatus(ComplaintStatus.ASSIGNED));
+
+        return counts;
     }
 
 }
