@@ -2,7 +2,6 @@ package com.sak.wifi.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -41,7 +40,9 @@ public class Complaint {
     @JoinColumn(name = "company_id")
     private Company company;
 
-    private String assignedEmployee;
+    @ManyToOne
+    @JoinColumn(name = "employee_id")
+    private Employee assignedEmployee;
 
     @PrePersist
     public void prePersist(){

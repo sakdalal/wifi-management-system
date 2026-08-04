@@ -22,6 +22,5 @@ public class ComplaintRequestDTO {
     @NotNull(message = "CustomerId is required")
     private Long customerId;
 
-    private String assignedEmployee;
 
 }
