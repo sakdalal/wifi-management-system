@@ -29,6 +29,7 @@ public class ComplaintService {
     private final CustomerRepository customerRepository;
     private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
+    private final NotificationService notificationService;
 
     public ComplaintResponseDTO createComplaint(ComplaintRequestDTO request){
 
@@ -44,18 +45,19 @@ public class ComplaintService {
         complaint.setDescription(request.getDescription());
         complaint.setStatus(ComplaintStatus.OPEN);
         complaint.setPriority(request.getPriority());
-        System.out.println("Complaint ID = " + complaint.getId());
-        System.out.println("Customer ID = " + complaint.getCustomer().getId());
-        System.out.println("Company = " + complaint.getCompany());
+
 
         Complaint savedComplaint=complaintRepository.save(complaint);
         ComplaintResponseDTO response= modelMapper.map(savedComplaint,ComplaintResponseDTO.class);
+
         response.setCustomerName(customer.getName());
         response.setCustomerId(customer.getId());
         complaint.setCompany(customer.getCompany());
-        System.out.println("Complaint ID = " + complaint.getId());
-        System.out.println("Customer ID = " + complaint.getCustomer().getId());
-        System.out.println("Company = " + complaint.getCompany());
+
+        notificationService.createNotification("New Complaint",
+                "Complaint #"+savedComplaint.getId()+ "created",
+                "ADMIN",
+                1L);
 
         return response;
 
@@ -130,6 +132,11 @@ public class ComplaintService {
 
         Complaint saved=complaintRepository.save(complaint);
 
+        notificationService.createNotification("Complaint Assigned",
+                "Complaint #"+saved.getId()+ "assigned",
+                "EMPLOYEE",
+                employee.getId());
+
         return modelMapper.map(saved, ComplaintResponseDTO.class);
     }
 
@@ -143,6 +150,18 @@ public class ComplaintService {
         complaint.setStatus(request.getStatus());
 
         Complaint saved=complaintRepository.save(complaint);
+
+        if(request.getStatus()==ComplaintStatus.RESOLVED){
+            notificationService.createNotification("Complaint Resolved",
+                    "Complaint #"+saved.getId()+ "resolved",
+                    "CUSTOMER",
+                    complaint.getCustomer().getId());
+        } else if(request.getStatus()==ComplaintStatus.IN_PROGRESS){
+            notificationService.createNotification("Complaint In-Progress",
+                    "Complaint #"+saved.getId()+ "in progress",
+                    "CUSTOMER",
+                    complaint.getCustomer().getId());
+        }
 
         return modelMapper.map(saved, ComplaintResponseDTO.class);
     }
