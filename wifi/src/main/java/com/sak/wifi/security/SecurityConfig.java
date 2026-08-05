@@ -67,6 +67,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/complaints/**")
                         .permitAll()
+                        .requestMatchers("/notifications/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
