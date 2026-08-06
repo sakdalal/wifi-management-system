@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,7 @@ public class ComplaintService {
     private final EmployeeRepository employeeRepository;
     private final ModelMapper modelMapper;
     private final NotificationService notificationService;
+    private final EmailService emailService;
 
     public ComplaintResponseDTO createComplaint(ComplaintRequestDTO request){
 
@@ -38,26 +40,28 @@ public class ComplaintService {
 
         Complaint complaint=new Complaint();
 
-
-
         complaint.setCustomer(customer);
         complaint.setTitle(request.getTitle());
         complaint.setDescription(request.getDescription());
         complaint.setStatus(ComplaintStatus.OPEN);
         complaint.setPriority(request.getPriority());
-
+        complaint.setCompany(customer.getCompany());
 
         Complaint savedComplaint=complaintRepository.save(complaint);
         ComplaintResponseDTO response= modelMapper.map(savedComplaint,ComplaintResponseDTO.class);
 
         response.setCustomerName(customer.getName());
         response.setCustomerId(customer.getId());
-        complaint.setCompany(customer.getCompany());
+
 
         notificationService.createNotification("New Complaint",
                 "Complaint #"+savedComplaint.getId()+ "created",
                 "ADMIN",
                 1L);
+
+        emailService.sendEmail(customer.getEmail(),
+                "Complaint Registered",
+                "Your complaint has been registered successfully");
 
         return response;
 
@@ -96,7 +100,7 @@ public class ComplaintService {
 
     public void deleteComplaint(Long id){
         Complaint complaint= complaintRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("Complaint not found with id:"+id));
+                .orElseThrow(()->new ResourceNotFoundException("Complaint not found with id:"+id));
 
         complaintRepository.delete(complaint);
     }
@@ -137,7 +141,17 @@ public class ComplaintService {
                 "EMPLOYEE",
                 employee.getId());
 
-        return modelMapper.map(saved, ComplaintResponseDTO.class);
+        emailService.sendEmail(employee.getEmail(),
+                "Complaint Assigned",
+                "A complaint has been assigned to you");
+
+        Customer customer=saved.getCustomer();
+
+        emailService.sendEmail(customer.getEmail(),
+                "Complaint Assigned",
+                "Your complaint #" +saved.getId()+" has been assigned to our support team");
+
+        return convertToDTO(saved);
     }
 
     @Transactional
@@ -156,14 +170,21 @@ public class ComplaintService {
                     "Complaint #"+saved.getId()+ "resolved",
                     "CUSTOMER",
                     complaint.getCustomer().getId());
+            emailService.sendEmail(complaint.getCustomer().getEmail(),
+                    "Complaint Resolved",
+                    "Your complaint #"+saved.getId()+ " has been resolved");
+
         } else if(request.getStatus()==ComplaintStatus.IN_PROGRESS){
             notificationService.createNotification("Complaint In-Progress",
                     "Complaint #"+saved.getId()+ "in progress",
                     "CUSTOMER",
                     complaint.getCustomer().getId());
+            emailService.sendEmail(complaint.getCustomer().getEmail(),
+                    "Complaint In Progress",
+                    "Your complaint #"+saved.getId()+ " is still in-progress");
         }
 
-        return modelMapper.map(saved, ComplaintResponseDTO.class);
+        return convertToDTO(saved);
     }
 
     public List<ComplaintResponseDTO> getComplaintByStatus(ComplaintStatus status){
@@ -176,9 +197,9 @@ public class ComplaintService {
 
     public Map<String,Long> dashboardCounts(){
         Map<String,Long> counts = new HashMap<>();
-        counts.put("Open",complaintRepository.countByStatus(ComplaintStatus.OPEN));
-        counts.put("Resolved",complaintRepository.countByStatus(ComplaintStatus.RESOLVED));
-        counts.put("Assigned",complaintRepository.countByStatus(ComplaintStatus.ASSIGNED));
+        counts.put("open",complaintRepository.countByStatus(ComplaintStatus.OPEN));
+        counts.put("resolved",complaintRepository.countByStatus(ComplaintStatus.RESOLVED));
+        counts.put("assigned",complaintRepository.countByStatus(ComplaintStatus.ASSIGNED));
 
         return counts;
     }
