@@ -69,6 +69,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/notifications/**")
                         .permitAll()
+                        .requestMatchers("/dashboard/**")
+                        .permitAll()
                         .anyRequest()
                         .authenticated()
                 )
