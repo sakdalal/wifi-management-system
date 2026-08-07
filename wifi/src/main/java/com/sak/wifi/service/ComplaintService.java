@@ -15,12 +15,14 @@ import com.sak.wifi.repository.EmployeeRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +34,9 @@ public class ComplaintService {
     private final ModelMapper modelMapper;
     private final NotificationService notificationService;
     private final EmailService emailService;
+    private final ActivityLogService activityLogService;
+
+    private static final Logger logger= LoggerFactory.getLogger(ComplaintService.class);
 
     public ComplaintResponseDTO createComplaint(ComplaintRequestDTO request){
 
@@ -46,6 +51,9 @@ public class ComplaintService {
         complaint.setStatus(ComplaintStatus.OPEN);
         complaint.setPriority(request.getPriority());
         complaint.setCompany(customer.getCompany());
+
+        logger.info("Creating complaint for customer {}", customer.getId());
+
 
         Complaint savedComplaint=complaintRepository.save(complaint);
         ComplaintResponseDTO response= modelMapper.map(savedComplaint,ComplaintResponseDTO.class);
@@ -63,6 +71,10 @@ public class ComplaintService {
                 "Complaint Registered",
                 "Your complaint has been registered successfully");
 
+        logger.info("Complaint {} created successfully", complaint.getId());
+        activityLogService.logActivity("Complaint created",
+                "Complaint "+complaint.getId()+" created",
+                "Customer");
         return response;
 
     }
@@ -151,6 +163,14 @@ public class ComplaintService {
                 "Complaint Assigned",
                 "Your complaint #" +saved.getId()+" has been assigned to our support team");
 
+        logger.info("Assigning complaint {} to employee {}", complaint.getId(), employee.getId());
+        activityLogService.logActivity(
+                "Complaint Assigned",
+                "Complaint " + complaint.getId()
+                        + " assigned to employee "
+                        + employee.getId(),
+                "Admin");
+
         return convertToDTO(saved);
     }
 
@@ -173,6 +193,10 @@ public class ComplaintService {
             emailService.sendEmail(complaint.getCustomer().getEmail(),
                     "Complaint Resolved",
                     "Your complaint #"+saved.getId()+ " has been resolved");
+            activityLogService.logActivity(
+                    "Complaint Closed",
+                    "Complaint " + complaint.getId() + " resolved",
+                    "Employee");
 
         } else if(request.getStatus()==ComplaintStatus.IN_PROGRESS){
             notificationService.createNotification("Complaint In-Progress",
@@ -182,8 +206,13 @@ public class ComplaintService {
             emailService.sendEmail(complaint.getCustomer().getEmail(),
                     "Complaint In Progress",
                     "Your complaint #"+saved.getId()+ " is still in-progress");
+            activityLogService.logActivity(
+                    "Complaint In Progress",
+                    "Complaint " + complaint.getId() + " in progress",
+                    "Employee");
         }
 
+        logger.info("Complaint {} status changed to {}", complaint.getId(), complaint.getStatus());
         return convertToDTO(saved);
     }
 
