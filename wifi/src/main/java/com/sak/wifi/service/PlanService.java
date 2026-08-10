@@ -1,5 +1,6 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.config.TenantContext;
 import com.sak.wifi.dto.PlanRequestDTO;
 import com.sak.wifi.entity.Company;
 import com.sak.wifi.entity.Plan;
@@ -19,11 +20,12 @@ public class PlanService {
     private final CompanyRepository companyRepository;
 
     public Plan createPlan(PlanRequestDTO request){
-        Company company = companyRepository.findById(request.getCompanyId())
+        Long companyId= TenantContext.getCompanyId();
+        Company company = companyRepository.findById(companyId)
                 .orElseThrow(() -> new RuntimeException("Company not found"));
 
-        if(planRepository.findByPlanName(request.getPlanName()).isPresent()){
-            throw new RuntimeException("Plan already exists");
+        if(planRepository.findByPlanNameAndCompanyId(request.getPlanName(),companyId).isPresent()){
+            throw new RuntimeException("Plan already exists for this company");
         }
         if(request.getPrice().compareTo(BigDecimal.ZERO)<0){
             throw new RuntimeException("Price cannot be negative");
@@ -42,7 +44,9 @@ public class PlanService {
     }
 
     public Plan updatePlan(Long id, PlanRequestDTO updated){
-        Plan plan= planRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+
+        Plan plan= planRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new RuntimeException("No such plan exists"));
 
         plan.setPlanName(updated.getPlanName());
@@ -56,17 +60,22 @@ public class PlanService {
     }
 
     public List<Plan> getAllPlans(){
-        return planRepository.findAll();
+        Long companyId= TenantContext.getCompanyId();
+
+        return planRepository.findByCompanyId(companyId);
     }
 
     public Plan getPlanById(Long id){
-        return planRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+        return planRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new RuntimeException("No plan exists with id: "+id));
 
     }
 
     public String deletePlan(Long id){
-        Plan plan= planRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+
+        Plan plan= planRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new RuntimeException("No plan to delete with id: "+id));
         planRepository.delete(plan);
 

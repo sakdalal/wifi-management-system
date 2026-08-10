@@ -81,12 +81,10 @@ public class CustomerController {
     @GetMapping("/find")
     public ResponseEntity<List<CustomerResponseDTO>> findCustomers(
             @RequestParam(required = false)
-            CustomerStatus status,
-            @RequestParam(required = false)
-            Long companyId
+            CustomerStatus status
     ){
         return ResponseEntity.ok(
-                customerService.findCustomers(status,companyId)
+                customerService.findCustomers(status)
         );
     }
 

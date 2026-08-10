@@ -10,9 +10,13 @@ import java.util.Optional;
 @Repository
 public interface PlanRepository extends JpaRepository<Plan,Long> {
 
-
-    Optional<Plan> findByPlanName(String planName);
+    Optional<Plan> findByPlanNameAndCompanyId(String planName,Long companyId);
 
     List<Plan> findByCompanyId(Long companyId);
+
+    Optional<Plan> findByIdAndCompanyId(
+            Long id,
+            Long companyId
+    );
 
 }
