@@ -1,13 +1,11 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.config.TenantContext;
 import com.sak.wifi.dto.AssignEmployeeRequestDTO;
 import com.sak.wifi.dto.ComplaintRequestDTO;
 import com.sak.wifi.dto.ComplaintResponseDTO;
 import com.sak.wifi.dto.UpdateComplaintStatusDTO;
-import com.sak.wifi.entity.Complaint;
-import com.sak.wifi.entity.ComplaintStatus;
-import com.sak.wifi.entity.Customer;
-import com.sak.wifi.entity.Employee;
+import com.sak.wifi.entity.*;
 import com.sak.wifi.exception.ResourceNotFoundException;
 import com.sak.wifi.repository.ComplaintRepository;
 import com.sak.wifi.repository.CustomerRepository;
@@ -40,7 +38,9 @@ public class ComplaintService {
 
     public ComplaintResponseDTO createComplaint(ComplaintRequestDTO request){
 
-        Customer customer= customerRepository.findById(request.getCustomerId())
+        Long companyId = TenantContext.getCompanyId();
+
+        Customer customer= customerRepository.findByIdAndCompanyId(request.getCustomerId(),companyId)
                 .orElseThrow(()-> new ResourceNotFoundException("Customer not find with id:" + request.getCustomerId()));
 
         Complaint complaint=new Complaint();
@@ -80,24 +80,31 @@ public class ComplaintService {
     }
 
     public List<ComplaintResponseDTO> getAllComplaints(){
-        List<Complaint> complaints=complaintRepository.findAll();
+        Long companyId= TenantContext.getCompanyId();
+
+        List<Complaint> complaints=complaintRepository.findByCompanyId(companyId);
         return complaints.stream()
                 .map(this::convertToDTO)
                 .toList();
     }
 
     public ComplaintResponseDTO getComplaintById(Long id){
-        Complaint complaint=complaintRepository.findById(id)
+
+        Long companyId= TenantContext.getCompanyId();
+        Complaint complaint=complaintRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new ResourceNotFoundException("complaint not found with id:"+id));
         return convertToDTO(complaint);
     }
 
     public ComplaintResponseDTO updateComplaint(Long id,ComplaintRequestDTO request){
 
-        Complaint complaint=complaintRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+
+
+        Complaint complaint=complaintRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new ResourceNotFoundException("complaint not found with id:"+id));
 
-        Customer customer=customerRepository.findById(request.getCustomerId())
+        Customer customer=customerRepository.findByIdAndCompanyId(request.getCustomerId(),companyId)
                 .orElseThrow(()->new ResourceNotFoundException("No Customer not find"));
 
         complaint.setTitle(request.getTitle());
@@ -111,7 +118,9 @@ public class ComplaintService {
     }
 
     public void deleteComplaint(Long id){
-        Complaint complaint= complaintRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+
+        Complaint complaint= complaintRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new ResourceNotFoundException("Complaint not found with id:"+id));
 
         complaintRepository.delete(complaint);
@@ -137,7 +146,10 @@ public class ComplaintService {
     public ComplaintResponseDTO assignEmployee(Long complainId,
                                                AssignEmployeeRequestDTO request){
 
-        Complaint complaint=complaintRepository.findById(complainId)
+        Long companyId= TenantContext.getCompanyId();
+
+
+        Complaint complaint=complaintRepository.findByIdAndCompanyId(complainId,companyId)
                 .orElseThrow(()->new ResourceNotFoundException("No such complaint exist"));
 
         Employee employee= employeeRepository.findById(request.getEmployeeId())
@@ -178,7 +190,9 @@ public class ComplaintService {
     public ComplaintResponseDTO updateStatus(Long complainId,
                                                UpdateComplaintStatusDTO request){
 
-        Complaint complaint=complaintRepository.findById(complainId)
+        Long companyId =TenantContext.getCompanyId();
+
+        Complaint complaint=complaintRepository.findByIdAndCompanyId(complainId,companyId)
                 .orElseThrow(()->new ResourceNotFoundException("No such complaint exist"));
 
         complaint.setStatus(request.getStatus());
@@ -218,17 +232,20 @@ public class ComplaintService {
 
     public List<ComplaintResponseDTO> getComplaintByStatus(ComplaintStatus status){
 
-        return complaintRepository.findByStatus(status)
+        Long companyId=TenantContext.getCompanyId();
+
+        return complaintRepository.findByCompanyIdAndStatus(companyId,status)
                 .stream()
                 .map(complaint -> modelMapper.map(complaint, ComplaintResponseDTO.class))
                 .toList();
     }
 
     public Map<String,Long> dashboardCounts(){
+        Long companyId= TenantContext.getCompanyId();
         Map<String,Long> counts = new HashMap<>();
-        counts.put("open",complaintRepository.countByStatus(ComplaintStatus.OPEN));
-        counts.put("resolved",complaintRepository.countByStatus(ComplaintStatus.RESOLVED));
-        counts.put("assigned",complaintRepository.countByStatus(ComplaintStatus.ASSIGNED));
+        counts.put("open",complaintRepository.countByStatusAndCompanyId(ComplaintStatus.OPEN,companyId));
+        counts.put("resolved",complaintRepository.countByStatusAndCompanyId(ComplaintStatus.RESOLVED,companyId));
+        counts.put("assigned",complaintRepository.countByStatusAndCompanyId(ComplaintStatus.ASSIGNED,companyId));
 
         return counts;
     }

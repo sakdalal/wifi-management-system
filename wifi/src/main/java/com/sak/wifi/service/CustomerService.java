@@ -1,5 +1,6 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.config.TenantContext;
 import com.sak.wifi.dto.CustomerRequestDTO;
 import com.sak.wifi.dto.CustomerResponseDTO;
 import com.sak.wifi.dto.PageResponseDTO;
@@ -20,7 +21,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.naming.Name;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -36,9 +36,9 @@ public class CustomerService {
 
     public CustomerResponseDTO createCustomer(CustomerRequestDTO request){
 
-        Company company = companyRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new ResourceNotFoundException("Company not found"));
-
+        Long companyId= TenantContext.getCompanyId();
+        Company company= companyRepository.findById(companyId)
+                .orElseThrow(()->new ResourceNotFoundException("Company not found"));
 
         Customer customer = new Customer();
         customer.setName(request.getName());
@@ -57,7 +57,11 @@ public class CustomerService {
 
 
     public CustomerResponseDTO getCustomer(Long id){
-        Customer customer=customerRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+        Company company= companyRepository.findById(companyId)
+                .orElseThrow(()->new ResourceNotFoundException("Company not found"));
+
+        Customer customer=customerRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new ResourceNotFoundException("Customer Not Found with id: "+id));
 
         return mapper.map(customer,CustomerResponseDTO.class);
@@ -68,13 +72,18 @@ public class CustomerService {
                                                                String sortBy,
                                                                String direction){
 
+        Long companyId= TenantContext.getCompanyId();
+        Company company= companyRepository.findById(companyId)
+                .orElseThrow(()->new ResourceNotFoundException("Company not found"));
+
+
         Sort sort=direction.equalsIgnoreCase("desc")
                     ? Sort.by(sortBy).descending()
                     : Sort.by(sortBy).ascending();
 
         Pageable pageable= PageRequest.of(page,size,sort);
 
-        Page<Customer> customerPage=customerRepository.findAll(pageable);
+        Page<Customer> customerPage=customerRepository.findByCompanyId(companyId,pageable);
 
         List<CustomerResponseDTO> customers=customerPage
                 .getContent()
@@ -92,7 +101,9 @@ public class CustomerService {
     }
 
     public void deleteCustomer(Long id){
-        Customer customer=customerRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+
+        Customer customer=customerRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()-> new ResourceNotFoundException("Customer Not Found"));
 
         customerRepository.delete(customer);
@@ -100,7 +111,12 @@ public class CustomerService {
 
     public CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO request){
 
-        Customer customer=customerRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+        Company company= companyRepository.findById(companyId)
+                .orElseThrow(()->new ResourceNotFoundException("Company not found"));
+
+
+        Customer customer=customerRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()-> new ResourceNotFoundException("Customer not Found"));
 
         customer.setName(request.getName());
@@ -120,24 +136,26 @@ public class CustomerService {
 
     public List<CustomerResponseDTO> searchCustomers(String keyword){
 
-        return customerRepository.findByNameContainingIgnoreCase(keyword)
+        Long companyId= TenantContext.getCompanyId();
+        Company company= companyRepository.findById(companyId)
+                .orElseThrow(()->new ResourceNotFoundException("Company not found"));
+
+
+        return customerRepository.findByNameContainingIgnoreCase(companyId,keyword)
                 .stream()
                 .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
                 .toList();
     }
 
-    public List<CustomerResponseDTO> findCustomers(CustomerStatus status, Long companyId){
+    public List<CustomerResponseDTO> findCustomers(CustomerStatus status){
+        Long companyId = TenantContext.getCompanyId();
 
         List<Customer> customers;
 
-        if(status!=null && companyId!=null){
+        if(status!=null){
             customers=customerRepository.findByStatusAndCompanyId(status,companyId);
-        } else if (status!=null) {
-            customers=customerRepository.findByStatus(status);
-        } else if (companyId!=null) {
+        }else {
             customers=customerRepository.findByCompanyId(companyId);
-        } else {
-            customers=customerRepository.findAll();
         }
 
         return customers.stream()
@@ -148,7 +166,9 @@ public class CustomerService {
 
     public CustomerResponseDTO uploadImage(Long id, MultipartFile file){
 
-        Customer customer= customerRepository.findById(id)
+        Long companyId= TenantContext.getCompanyId();
+
+        Customer customer= customerRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new RuntimeException("Customer not found"));
 
         if(file.isEmpty()){
@@ -187,10 +207,12 @@ public class CustomerService {
 
     public CustomerResponseDTO assignPlan(Long customerId, Long planId){
 
-        Customer customer= customerRepository.findById(customerId)
+        Long companyId= TenantContext.getCompanyId();
+
+        Customer customer= customerRepository.findByIdAndCompanyId(customerId,companyId)
                 .orElseThrow(()->new RuntimeException("Customer Not Found"));
 
-        Plan plan = planRepository.findById(planId)
+        Plan plan = planRepository.findByIdAndCompanyId(planId,companyId)
                 .orElseThrow(()->new RuntimeException("No such plan exists"));
 
         if(plan.getPlanStatus()!= PlanStatus.ACTIVE){
@@ -217,10 +239,13 @@ public class CustomerService {
 
     public CustomerResponseDTO upgradePlan(Long customerId, Long planId){
 
-        Customer customer= customerRepository.findById(customerId)
+        Long companyId= TenantContext.getCompanyId();
+
+
+        Customer customer= customerRepository.findByIdAndCompanyId(customerId,companyId)
                 .orElseThrow(()->new RuntimeException("Customer Not Found"));
 
-        Plan plan = planRepository.findById(planId)
+        Plan plan = planRepository.findByIdAndCompanyId(planId,companyId)
                 .orElseThrow(()->new RuntimeException("No such plan exists"));
 
         if(plan.getPlanStatus()!= PlanStatus.ACTIVE){
@@ -254,10 +279,12 @@ public class CustomerService {
 
     public CustomerResponseDTO downgradePlan(Long customerId, Long planId){
 
-        Customer customer= customerRepository.findById(customerId)
+        Long companyId= TenantContext.getCompanyId();
+
+        Customer customer= customerRepository.findByIdAndCompanyId(customerId,companyId)
                 .orElseThrow(()->new RuntimeException("Customer Not Found"));
 
-        Plan plan = planRepository.findById(planId)
+        Plan plan = planRepository.findByIdAndCompanyId(planId,companyId)
                 .orElseThrow(()->new RuntimeException("No such plan exists"));
 
         if(plan.getPlanStatus()!= PlanStatus.ACTIVE){

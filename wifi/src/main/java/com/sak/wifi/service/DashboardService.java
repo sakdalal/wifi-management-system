@@ -1,5 +1,6 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.config.TenantContext;
 import com.sak.wifi.dto.DashboardResponseDTO;
 import com.sak.wifi.entity.ComplaintPriority;
 import com.sak.wifi.entity.ComplaintStatus;
@@ -16,7 +17,10 @@ public class DashboardService {
     private final ComplaintRepository complaintRepository;
 
     public DashboardResponseDTO getDashboard(){
-        long open= complaintRepository.countByStatus(ComplaintStatus.OPEN);
+
+        Long companyId= TenantContext.getCompanyId();
+
+        long open= complaintRepository.countByStatusAndCompanyId(ComplaintStatus.OPEN,companyId);
         long priority=complaintRepository.countByPriority(ComplaintPriority.HIGH);
         long pending=complaintRepository.countByStatusAndCreatedAtBefore(ComplaintStatus.OPEN,
                 LocalDateTime.now().minusDays(3));
