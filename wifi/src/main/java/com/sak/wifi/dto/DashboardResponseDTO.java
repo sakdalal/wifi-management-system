@@ -2,6 +2,9 @@ package com.sak.wifi.dto;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -12,4 +15,12 @@ public class DashboardResponseDTO {
     private Long openComplaints;
     private Long highPriorityComplaints;
     private Long pendingMoreThanThreeDays;
+
+    private Long totalCustomers;
+    private Long newCustomers;
+    private BigDecimal totalRevenue;
+    private List<MonthlyRevenueDTO> monthlyRevenue;
+    private List<TopPlanDTO> topPlans;
+    private ComplaintStatsDTO complaintStats;
+    private List<CustomerGrowthDTO> customerGrowth;
 }

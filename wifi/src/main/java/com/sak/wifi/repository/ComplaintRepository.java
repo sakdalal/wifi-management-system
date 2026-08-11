@@ -16,11 +16,12 @@ public interface ComplaintRepository extends JpaRepository<Complaint,Long> {
 
     long countByStatusAndCompanyId(ComplaintStatus status,Long companyId);
 
-    long countByPriority(ComplaintPriority priority);
+    long countByPriorityAndCompanyId(ComplaintPriority priority,Long companyId);
 
-    long countByStatusAndCreatedAtBefore(
+    long countByStatusAndCreatedAtBeforeAndCompanyId(
             ComplaintStatus status,
-            LocalDateTime date);
+            LocalDateTime date,
+            Long CompanyId);
 
     List<Complaint> findByCompanyId(Long companyId);
 

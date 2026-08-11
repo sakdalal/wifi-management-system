@@ -15,10 +15,10 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
 
-    @GetMapping
+    @GetMapping("/summary")
     public ResponseEntity<DashboardResponseDTO> getDashboard(){
 
-        return ResponseEntity.ok(dashboardService.getDashboard());
+        return ResponseEntity.ok(dashboardService.getDashboardAll());
 
     }
 }
