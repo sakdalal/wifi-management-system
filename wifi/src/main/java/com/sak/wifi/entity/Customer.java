@@ -4,11 +4,20 @@ package com.sak.wifi.entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import lombok.*;
 
 @Entity
-@Table(name ="customers")
+@Table(name ="customers",
+        indexes = {
+                @Index(
+                        name = "idx_customer_company",
+                        columnList = "company_id"
+                ),
+                @Index(
+                        name = "idx_customer_company_status",
+                        columnList = "company_id,status"
+                )
+        })
 @Getter
 @Setter
 @NoArgsConstructor

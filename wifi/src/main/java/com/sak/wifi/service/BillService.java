@@ -5,11 +5,10 @@ import com.sak.wifi.entity.*;
 import com.sak.wifi.exception.ResourceNotFoundException;
 import com.sak.wifi.repository.BillRepository;
 import com.sak.wifi.repository.CustomerRepository;
-import com.sak.wifi.repository.PlanRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -21,9 +20,9 @@ import java.util.List;
 public class BillService {
 
     private final CustomerRepository customerRepository;
-    private final PlanRepository planRepository;
     private final BillRepository billRepository;
     private final ModelMapper modelMapper;
+
 
     @Transactional
     public BillResponseDTO generateBill(Long customerId){
