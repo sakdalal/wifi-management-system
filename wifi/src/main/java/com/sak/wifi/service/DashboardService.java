@@ -7,6 +7,7 @@ import com.sak.wifi.entity.ComplaintStatus;
 import com.sak.wifi.repository.ComplaintRepository;
 import com.sak.wifi.repository.DashboardRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -23,8 +24,15 @@ public class DashboardService {
     private final ComplaintRepository complaintRepository;
     private final DashboardRepository dashboardRepository;
 
+    @Cacheable(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public DashboardResponseDTO getDashboardAll(){
 
+        long start = System.currentTimeMillis();
+
+        System.out.println("Fetching dashboard from PostgreSQL...");
         Long companyId = TenantContext.getCompanyId();
 
         long open= complaintRepository.countByStatusAndCompanyId(ComplaintStatus.OPEN,companyId);
@@ -77,6 +85,14 @@ public class DashboardService {
                         companyId,
                         startOfGrowthPeriod
                 );
+
+        long end = System.currentTimeMillis();
+
+        System.out.println(
+                "Dashboard DB calculation took: "
+                        + (end - start)
+                        + " ms"
+        );
 
         return new DashboardResponseDTO(
                 open,

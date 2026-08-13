@@ -3,6 +3,7 @@ package com.sak.wifi.service;
 import com.sak.wifi.entity.User;
 import com.sak.wifi.repository.UserRepository;
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,7 +16,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email){
+    @NonNull
+    public UserDetails loadUserByUsername(@NonNull String email){
 
         User user= userRepository.findByEmail(email)
                 .orElseThrow(()->

@@ -8,7 +8,11 @@ import java.time.LocalDateTime;
 import lombok.*;
 
 @Entity
-@Table(name="payments")
+@Table(name="payments",
+        indexes = {
+        @Index(name = "idx_payment_company_date",
+                columnList="company_id,payment_date")
+        })
 @Getter
 @Setter
 @NoArgsConstructor

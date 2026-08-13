@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
@@ -36,6 +37,10 @@ public class ComplaintService {
 
     private static final Logger logger= LoggerFactory.getLogger(ComplaintService.class);
 
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public ComplaintResponseDTO createComplaint(ComplaintRequestDTO request){
 
         Long companyId = TenantContext.getCompanyId();
@@ -96,6 +101,10 @@ public class ComplaintService {
         return convertToDTO(complaint);
     }
 
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public ComplaintResponseDTO updateComplaint(Long id,ComplaintRequestDTO request){
 
         Long companyId= TenantContext.getCompanyId();
@@ -117,6 +126,11 @@ public class ComplaintService {
 
     }
 
+
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public void deleteComplaint(Long id){
         Long companyId= TenantContext.getCompanyId();
 
@@ -143,6 +157,10 @@ public class ComplaintService {
     }
 
     @Transactional
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public ComplaintResponseDTO assignEmployee(Long complainId,
                                                AssignEmployeeRequestDTO request){
 
@@ -187,6 +205,10 @@ public class ComplaintService {
     }
 
     @Transactional
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public ComplaintResponseDTO updateStatus(Long complainId,
                                                UpdateComplaintStatusDTO request){
 

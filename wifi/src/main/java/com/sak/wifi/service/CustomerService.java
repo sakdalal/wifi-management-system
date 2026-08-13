@@ -14,6 +14,8 @@ import org.modelmapper.ModelMapper;
 
 import java.math.BigDecimal;
 import java.nio.file.Files;
+
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +36,10 @@ public class CustomerService {
     private final PlanRepository planRepository;
     private final ModelMapper mapper;
 
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public CustomerResponseDTO createCustomer(CustomerRequestDTO request){
 
         Long companyId= TenantContext.getCompanyId();
@@ -100,6 +106,10 @@ public class CustomerService {
         );
     }
 
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public void deleteCustomer(Long id){
         Long companyId= TenantContext.getCompanyId();
 
@@ -109,6 +119,10 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public CustomerResponseDTO updateCustomer(Long id, CustomerRequestDTO request){
 
         Long companyId= TenantContext.getCompanyId();
@@ -164,6 +178,10 @@ public class CustomerService {
 
     }
 
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public CustomerResponseDTO uploadImage(Long id, MultipartFile file){
 
         Long companyId= TenantContext.getCompanyId();
@@ -237,10 +255,14 @@ public class CustomerService {
 
     }
 
+
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public CustomerResponseDTO upgradePlan(Long customerId, Long planId){
 
         Long companyId= TenantContext.getCompanyId();
-
 
         Customer customer= customerRepository.findByIdAndCompanyId(customerId,companyId)
                 .orElseThrow(()->new RuntimeException("Customer Not Found"));
@@ -277,6 +299,10 @@ public class CustomerService {
 
     }
 
+    @CacheEvict(
+            value = "dashboard",
+            key="T(com.sak.wifi.config.TenantContext).getCompanyId()"
+    )
     public CustomerResponseDTO downgradePlan(Long customerId, Long planId){
 
         Long companyId= TenantContext.getCompanyId();
