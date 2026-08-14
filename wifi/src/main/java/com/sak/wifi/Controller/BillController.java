@@ -1,6 +1,8 @@
 package com.sak.wifi.Controller;
 
 import com.sak.wifi.dto.BillResponseDTO;
+import com.sak.wifi.dto.PaymentRequestDTO;
+import com.sak.wifi.dto.PaymentResponseDTO;
 import com.sak.wifi.service.BillService;
 import com.sak.wifi.service.InvoiceService;
 import lombok.RequiredArgsConstructor;
@@ -40,10 +42,11 @@ public class BillController {
     }
 
     @PutMapping("/pay/{billId}")
-    public ResponseEntity<BillResponseDTO> payBill(
-            @PathVariable Long billId
+    public ResponseEntity<PaymentResponseDTO> payBill(
+            @PathVariable Long billId,
+            @RequestBody PaymentRequestDTO request
     ){
-        return ResponseEntity.ok(billService.payBill(billId));
+        return ResponseEntity.ok(billService.payBill(billId,request));
     }
 
     @GetMapping("/{id}/invoice")
