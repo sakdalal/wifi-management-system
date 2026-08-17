@@ -1,0 +1,60 @@
+# your file name should be compose.yaml
+# if you want to connect your docker to already existing database
+
+#services:
+#  backend:
+#    build: .
+#    container_name: isp-saas-backend
+#
+#    ports:
+#      - "8080:8080"
+#
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://host.docker.internal:5432/isp_saas
+#      SPRING_DATASOURCE_USERNAME: your_username(postgres)
+#      SPRING_DATASOURCE_PASSWORD: your_password(postgres)
+
+
+#     or to create a completely different and fresh container the following code in your compose.yaml file
+
+services:
+
+  postgres:
+    image: postgres:16
+    container_name: isp-postgres
+
+    environment:
+      POSTGRES_DB: isp_saas
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d isp_saas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    container_name: isp-saas-backend
+
+    ports:
+      - "8080:8080"
+
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/isp_saas
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
