@@ -25,8 +25,8 @@ services:
 
     environment:
       POSTGRES_DB: isp_saas
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
 
     ports:
       - "5432:5432"
@@ -49,8 +49,8 @@ services:
 
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/isp_saas
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_USERNAME: ${DB_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
 
     depends_on:
       postgres:
