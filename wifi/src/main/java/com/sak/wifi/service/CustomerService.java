@@ -155,7 +155,7 @@ public class CustomerService {
                 .orElseThrow(()->new ResourceNotFoundException("Company not found"));
 
 
-        return customerRepository.findByNameContainingIgnoreCase(companyId,keyword)
+        return customerRepository.findByCompanyIdAndNameContainingIgnoreCase(companyId,keyword)
                 .stream()
                 .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
                 .toList();

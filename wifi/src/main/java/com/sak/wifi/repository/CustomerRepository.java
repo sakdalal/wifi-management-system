@@ -13,7 +13,7 @@ public interface CustomerRepository extends JpaRepository<Customer,Long> {
 
     List<Customer> findByStatus(CustomerStatus status);
 
-    List<Customer> findByNameContainingIgnoreCase(Long companyId,String keyword);
+    List<Customer> findByCompanyIdAndNameContainingIgnoreCase(Long companyId,String keyword);
 
     List<Customer> findByCompanyId(Long companyId);
 
