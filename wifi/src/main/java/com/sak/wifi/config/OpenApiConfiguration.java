@@ -9,9 +9,16 @@ import org.springframework.context.annotation.Configuration;
 public class OpenApiConfiguration {
 
     @Bean
-    public OperationCustomizer companyIdHeaderCustomizer(){
+    public OperationCustomizer companyIdHeaderCustomizer() {
 
         return (operation, handlerMethod) -> {
+
+            String controllerName =
+                    handlerMethod.getBeanType().getSimpleName();
+
+            if (controllerName.equals("CompanyController")) {
+                return operation;
+            }
 
             operation.addParametersItem(
                     new Parameter()
@@ -20,6 +27,7 @@ public class OpenApiConfiguration {
                             .description("Company ID for tenant isolation")
                             .required(true)
             );
+
             return operation;
         };
 

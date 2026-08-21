@@ -60,7 +60,7 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/customers/**")
                         .permitAll()
-                        .requestMatchers("/company/**")
+                        .requestMatchers("/company","/company/**")
                         .permitAll()
                         .requestMatchers("/plans/**")
                         .permitAll()

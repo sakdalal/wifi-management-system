@@ -31,7 +31,7 @@ public class Company {
     private String address;
 
     @Column(nullable = false)
-    private boolean isVerified=false;
+    private boolean verified=false;
 
     @Column(nullable = false,updatable = false)
     private LocalDateTime createdAt;

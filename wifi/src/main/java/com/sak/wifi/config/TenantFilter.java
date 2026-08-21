@@ -16,9 +16,13 @@ public class TenantFilter extends OncePerRequestFilter {
     protected boolean shouldNotFilter(HttpServletRequest request) {
 
         String path = request.getServletPath();
+        System.out.println("TenantFilter path: " + path);
 
         return path.startsWith("/swagger-ui")
-                || path.startsWith("/v3/api-docs");
+                || path.startsWith("/v3/api-docs")
+                || path.startsWith("/auth/")
+                || path.equals("/company")
+                || path.startsWith("/company/");
     }
 
     @Override
