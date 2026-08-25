@@ -1,5 +1,6 @@
 package com.sak.wifi.dto;
 
+import com.sak.wifi.entity.PlanStatus;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,5 +17,6 @@ public class PlanRequestDTO {
     private String description;
     private Boolean active;
     private Long companyId;
+    private PlanStatus planStatus;
 
 }
