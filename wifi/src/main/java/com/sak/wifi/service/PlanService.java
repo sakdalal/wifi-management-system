@@ -4,6 +4,7 @@ import com.sak.wifi.config.TenantContext;
 import com.sak.wifi.dto.PlanRequestDTO;
 import com.sak.wifi.entity.Company;
 import com.sak.wifi.entity.Plan;
+import com.sak.wifi.entity.PlanStatus;
 import com.sak.wifi.repository.CompanyRepository;
 import com.sak.wifi.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -39,6 +40,8 @@ public class PlanService {
         plan.setDescription(request.getDescription());
         plan.setActive(request.getActive());
         plan.setCompany(company);
+        plan.setActive(request.getActive());
+        plan.setPlanStatus(PlanStatus.ACTIVE);
         return planRepository.save(plan);
 
     }
@@ -54,6 +57,8 @@ public class PlanService {
         plan.setPrice(updated.getPrice());
         plan.setDescription(updated.getDescription());
         plan.setValidityDays(updated.getValidityDays());
+        plan.setActive(updated.getActive());
+        plan.setPlanStatus(updated.getPlanStatus());
 
         return planRepository.save(plan);
 
