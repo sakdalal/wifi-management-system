@@ -70,7 +70,7 @@ public class CustomerService {
         Customer customer=customerRepository.findByIdAndCompanyId(id,companyId)
                 .orElseThrow(()->new ResourceNotFoundException("Customer Not Found with id: "+id));
 
-        return mapper.map(customer,CustomerResponseDTO.class);
+        return toCustomerResponseDTO(customer);
     }
 
     public PageResponseDTO<CustomerResponseDTO> getAllCustomer(int page,
@@ -94,7 +94,7 @@ public class CustomerService {
         List<CustomerResponseDTO> customers=customerPage
                 .getContent()
                 .stream()
-                .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
+                .map(this::toCustomerResponseDTO)
                 .toList();
 
         return new PageResponseDTO<>(
@@ -157,7 +157,7 @@ public class CustomerService {
 
         return customerRepository.findByCompanyIdAndNameContainingIgnoreCase(companyId,keyword)
                 .stream()
-                .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
+                .map(this::toCustomerResponseDTO)
                 .toList();
     }
 
@@ -173,7 +173,7 @@ public class CustomerService {
         }
 
         return customers.stream()
-                .map(customer -> mapper.map(customer,CustomerResponseDTO.class))
+                .map(this::toCustomerResponseDTO)
                 .toList();
 
     }
@@ -245,13 +245,7 @@ public class CustomerService {
         customer.setPlan(plan);
         Customer saved=customerRepository.save(customer);
 
-        CustomerResponseDTO dto= mapper.map(saved, CustomerResponseDTO.class);
-        if(customer.getPlan()!=null){
-            dto.setCurrentPlan(customer.getPlan().getPlanName());
-            dto.setSpeed(customer.getPlan().getSpeedMbps());
-            dto.setPrice(customer.getPlan().getPrice());
-        }
-        return dto;
+        return toCustomerResponseDTO(saved);
 
     }
 
@@ -289,13 +283,8 @@ public class CustomerService {
         customer.setPlan(plan);
         Customer saved=customerRepository.save(customer);
 
-        CustomerResponseDTO dto= mapper.map(saved, CustomerResponseDTO.class);
-        if(customer.getPlan()!=null){
-            dto.setCurrentPlan(customer.getPlan().getPlanName());
-            dto.setSpeed(customer.getPlan().getSpeedMbps());
-            dto.setPrice(customer.getPlan().getPrice());
-        }
-        return dto;
+
+        return toCustomerResponseDTO(saved);
 
     }
 
@@ -331,15 +320,22 @@ public class CustomerService {
 
         customer.setPlan(plan);
         Customer saved=customerRepository.save(customer);
+        return toCustomerResponseDTO(saved);
 
-        CustomerResponseDTO dto= mapper.map(saved, CustomerResponseDTO.class);
-        if(customer.getPlan()!=null){
+
+    }
+
+    private CustomerResponseDTO toCustomerResponseDTO(Customer customer) {
+
+        CustomerResponseDTO dto = mapper.map(customer, CustomerResponseDTO.class);
+
+        if (customer.getPlan() != null) {
             dto.setCurrentPlan(customer.getPlan().getPlanName());
             dto.setSpeed(customer.getPlan().getSpeedMbps());
             dto.setPrice(customer.getPlan().getPrice());
         }
-        return dto;
 
+        return dto;
     }
 
 }
