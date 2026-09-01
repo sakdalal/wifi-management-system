@@ -1,5 +1,6 @@
 package com.sak.wifi.service;
 
+import com.sak.wifi.config.TenantContext;
 import com.sak.wifi.dto.BillResponseDTO;
 import com.sak.wifi.dto.PaymentRequestDTO;
 import com.sak.wifi.dto.PaymentResponseDTO;
@@ -31,11 +32,15 @@ public class BillService {
 
     @Transactional
     public BillResponseDTO generateBill(Long customerId){
+        Long companyId= TenantContext.getCompanyId();
         Customer customer= customerRepository.findById(customerId)
                 .orElseThrow(()->new ResourceNotFoundException("No Customer found"));
 
         if(customer.getPlan()==null){
             throw new IllegalArgumentException("The customer has no assigned plan");
+        }
+        if (!customer.getCompany().getId().equals(companyId)) {
+            throw new IllegalArgumentException("Customer does not belong to your company");
         }
 
         Plan plan =customer.getPlan();
@@ -55,7 +60,8 @@ public class BillService {
     }
 
     public List<BillResponseDTO> getAllBills(){
-        return billRepository.findAll()
+        Long companyId= TenantContext.getCompanyId();
+        return billRepository.findByCustomerCompanyId(companyId)
                 .stream()
                 .map(bill -> modelMapper.map(bill, BillResponseDTO.class))
                 .toList();
@@ -101,8 +107,8 @@ public class BillService {
 
     @Transactional
     public void generateMonthlyBills(){
-
-        List<Customer> customers = customerRepository.findByStatus(CustomerStatus.ACTIVE);
+        Long companyId=TenantContext.getCompanyId();
+        List<Customer> customers = customerRepository.findByStatusAndCompanyId(CustomerStatus.ACTIVE,companyId);
         String billingMonth= YearMonth.now().toString();
 
         for(Customer customer:customers){

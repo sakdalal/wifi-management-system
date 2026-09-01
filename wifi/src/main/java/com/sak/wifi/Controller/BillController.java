@@ -30,7 +30,9 @@ public class BillController {
     }
 
     @GetMapping
-    public ResponseEntity<List<BillResponseDTO>> getAllBills(){
+    public ResponseEntity<List<BillResponseDTO>> getAllBills(
+
+    ){
         return ResponseEntity.ok(billService.getAllBills());
     }
 

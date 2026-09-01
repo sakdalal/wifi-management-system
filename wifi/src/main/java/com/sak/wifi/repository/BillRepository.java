@@ -13,6 +13,8 @@ public interface BillRepository extends JpaRepository<Bill,Long> {
 
     List<Bill> findByCustomerId(Long customerId);
 
+    List<Bill> findByCustomerCompanyId(Long companyId);
+
     boolean existsByCustomerIdAndBillingMonth(Long customerId, String billingMonth);
 
 }
