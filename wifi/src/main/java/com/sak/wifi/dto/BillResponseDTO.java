@@ -1,5 +1,7 @@
 package com.sak.wifi.dto;
 
+import com.sak.wifi.entity.Company;
+import com.sak.wifi.entity.Customer;
 import com.sak.wifi.entity.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,4 +23,5 @@ public class BillResponseDTO {
     private String customerName;
     private String planName;
     private PaymentStatus paymentStatus;
+    private Customer customer;
 }
