@@ -315,7 +315,7 @@ public class CustomerService {
         BigDecimal newPrice=plan.getPrice();
 
         if(newPrice.compareTo(currentPrice)>=0){
-            throw new IllegalArgumentException("Upgrade can only happen to a higher priced plan");
+            throw new IllegalArgumentException("Downgrade can only happen to a lower priced plan");
         }
 
         customer.setPlan(plan);
@@ -330,6 +330,7 @@ public class CustomerService {
         CustomerResponseDTO dto = mapper.map(customer, CustomerResponseDTO.class);
 
         if (customer.getPlan() != null) {
+            dto.setPlanId(customer.getPlan().getId());
             dto.setCurrentPlan(customer.getPlan().getPlanName());
             dto.setSpeed(customer.getPlan().getSpeedMbps());
             dto.setPrice(customer.getPlan().getPrice());

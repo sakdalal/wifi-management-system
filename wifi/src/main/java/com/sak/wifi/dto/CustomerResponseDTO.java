@@ -30,6 +30,8 @@ public class CustomerResponseDTO {
 
     private Long companyId;
 
+    private  Long planId;
+
     private String currentPlan;
 
     private Integer speed;
