@@ -18,7 +18,8 @@ public class ComplaintResponseDTO {
 
     private String title;
     private String description;
-    private String assignedEmployee;
+    private Long assignedEmployeeId;
+    private String assignedEmployeeName;
     private Long customerId;
     private String customerName;
     private ComplaintPriority priority;

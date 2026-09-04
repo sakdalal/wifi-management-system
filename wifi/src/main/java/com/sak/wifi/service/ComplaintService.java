@@ -140,22 +140,6 @@ public class ComplaintService {
         complaintRepository.delete(complaint);
     }
 
-
-    private ComplaintResponseDTO convertToDTO(Complaint complaint){
-
-        ComplaintResponseDTO dto =
-                modelMapper.map(complaint,
-                        ComplaintResponseDTO.class);
-
-        dto.setCustomerId(
-                complaint.getCustomer().getId());
-
-        dto.setCustomerName(
-                complaint.getCustomer().getName());
-
-        return dto;
-    }
-
     @Transactional
     @CacheEvict(
             value = "dashboard",
@@ -270,6 +254,26 @@ public class ComplaintService {
         counts.put("assigned",complaintRepository.countByStatusAndCompanyId(ComplaintStatus.ASSIGNED,companyId));
 
         return counts;
+    }
+
+    private ComplaintResponseDTO convertToDTO(Complaint complaint){
+
+        ComplaintResponseDTO dto =
+                modelMapper.map(complaint,
+                        ComplaintResponseDTO.class);
+
+        dto.setCustomerId(
+                complaint.getCustomer().getId());
+
+        dto.setCustomerName(
+                complaint.getCustomer().getName());
+
+        if(complaint.getAssignedEmployee()!=null) {
+            dto.setAssignedEmployeeId(complaint.getAssignedEmployee().getId());
+            dto.setAssignedEmployeeName(complaint.getAssignedEmployee().getName());
+        }
+
+        return dto;
     }
 
 }
