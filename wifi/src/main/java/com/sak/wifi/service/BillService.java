@@ -27,7 +27,6 @@ public class BillService {
     private final CustomerRepository customerRepository;
     private final BillRepository billRepository;
     private final ModelMapper modelMapper;
-    private final PaymentRepository paymentRepository;
 
 
     @Transactional
@@ -69,40 +68,23 @@ public class BillService {
 
     public List<BillResponseDTO> getBillsByCustomer(Long customerID){
 
+        Long companyId= TenantContext.getCompanyId();
+
+        Customer customer= customerRepository.findById(customerID)
+                .orElseThrow(()->
+                        new ResourceNotFoundException("Customer not found"));
+
+        if(!customer.getCompany().getId().equals(companyId)){
+            throw new IllegalArgumentException("Customer does not belong to your company");
+        }
+
         return billRepository.findByCustomerId(customerID)
                 .stream()
                 .map(bill -> modelMapper.map(bill,BillResponseDTO.class))
                 .toList();
     }
 
-    @Transactional
-    public PaymentResponseDTO payBill(Long billId,
-                                      PaymentRequestDTO request){
-        Bill bill= billRepository.findById(billId)
-                .orElseThrow(()->new ResourceNotFoundException("Bill not found"));
 
-        if(bill.getPaymentStatus()==PaymentStatus.PAID){
-            throw new IllegalArgumentException("This Bill has Already been paid");
-        }
-
-        Payment payment=Payment.builder()
-                        .amount(bill.getAmount())
-                        .paymentDate(LocalDateTime.now())
-                        .paymentMethod(request.getPaymentMethod())
-                        .status(PaymentStatus.PAID)
-                        .transactionId(request.getTransactionId())
-                        .customer(bill.getCustomer())
-                        .company(bill.getCustomer().getCompany())
-                        .bill(bill)
-                        .build();
-
-        paymentRepository.save(payment);
-
-        bill.setPaymentStatus(PaymentStatus.PAID);
-        billRepository.save(bill);
-        return modelMapper.map(payment, PaymentResponseDTO.class);
-
-    }
 
 
     @Transactional
