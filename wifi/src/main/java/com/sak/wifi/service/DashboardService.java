@@ -128,8 +128,7 @@ public class DashboardService {
         for (Object[] row : results) {
 
             String month =
-                    ((java.sql.Timestamp) row[0])
-                            .toLocalDateTime()
+                    ((LocalDateTime) row[0])
                             .toLocalDate()
                             .format(formatter);
 
