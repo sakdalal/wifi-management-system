@@ -54,6 +54,7 @@ public class AuthService {
                 )
                 .company(company)
                 .role(Role.EMPLOYEE)
+                .phone(request.getPhone())
                 .status(AccountStatus.UNVERIFIED)
                 .verificationToken(token)
                 .verificationExpiry(LocalDateTime.now().plusHours(24))
