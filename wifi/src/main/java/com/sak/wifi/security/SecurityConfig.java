@@ -81,6 +81,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/payments/**")
                         .permitAll()
+                        .requestMatchers("/users/profile")
+                        .authenticated()
                         .requestMatchers(
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**"
@@ -111,6 +113,7 @@ public class SecurityConfig {
         ));
         configuration.setAllowedHeaders(List.of(
                 "Content-Type",
+                "Authorization",
                 "X-Company-Id"
         ));
 

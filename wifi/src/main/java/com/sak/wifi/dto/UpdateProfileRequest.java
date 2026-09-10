@@ -2,25 +2,19 @@ package com.sak.wifi.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
-public class RegisterUserRequest {
+public class UpdateProfileRequest {
 
     @NotBlank(message = "Name is required")
     private String name;
 
     @Email(message = "Invalid email")
-    @NotBlank
+    @NotBlank(message = "Email is required")
     private String email;
 
-    @Size(min=6,message = "Password must have 6 characters")
-    private String password;
-
+    @NotBlank(message = "Phone number is required")
     private String phone;
-
-    private Long companyId;
 }
