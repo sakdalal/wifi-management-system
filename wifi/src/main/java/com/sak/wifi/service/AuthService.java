@@ -98,6 +98,7 @@ public class AuthService {
         return LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
+                .companyId(user.getCompany().getId())
                 .build();
     }
 
@@ -125,6 +126,7 @@ public class AuthService {
         return  LoginResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken1.getToken())
+                .companyId(user.getCompany().getId())
                 .build();
 
     }
