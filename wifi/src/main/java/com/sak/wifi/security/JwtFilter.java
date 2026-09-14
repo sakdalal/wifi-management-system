@@ -2,6 +2,7 @@ package com.sak.wifi.security;
 
 import com.sak.wifi.service.CustomUserDetailsService;
 import com.sak.wifi.service.JwtService;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,35 +47,46 @@ public class JwtFilter extends OncePerRequestFilter {
 
         String token =authHeader.substring(7);
 
-        String email= jwtService.extractUsername(token);
+        try {
 
-        System.out.println("JWT email: " + email);
+            String email = jwtService.extractUsername(token);
 
-        UserDetails userDetails= userDetailsService.loadUserByUsername(email);
+            System.out.println("JWT email: " + email);
 
-        if(jwtService.isTokenValid(token,userDetails)){
-            UsernamePasswordAuthenticationToken authentication=
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails
-                                    .getAuthorities()
-                    );
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-            System.out.println(
-                    "Authentication set: " +
-                            SecurityContextHolder
-                                    .getContext()
-                                    .getAuthentication()
-            );
+            if (jwtService.isTokenValid(token, userDetails)) {
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails
+                                        .getAuthorities()
+                        );
+                SecurityContextHolder
+                        .getContext()
+                        .setAuthentication(authentication);
 
-            System.out.println(
-                    "Authorities: " +
-                            userDetails.getAuthorities()
-            );
+                System.out.println(
+                        "Authentication set: " +
+                                SecurityContextHolder
+                                        .getContext()
+                                        .getAuthentication()
+                );
+
+                System.out.println(
+                        "Authorities: " +
+                                userDetails.getAuthorities()
+                );
+            }
+        }catch (ExpiredJwtException e) {
+            System.out.println("JWT expired");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
+        } catch (Exception e) {
+            System.out.println("Invalid JWT: " + e.getMessage());
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
 
         filterChain.doFilter(request,response);
