@@ -99,6 +99,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
                 .companyId(user.getCompany().getId())
+                .role(user.getRole())
                 .build();
     }
 
@@ -127,6 +128,7 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken1.getToken())
                 .companyId(user.getCompany().getId())
+                .role(user.getRole())
                 .build();
 
     }
