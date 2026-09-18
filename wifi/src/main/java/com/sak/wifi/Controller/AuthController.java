@@ -3,6 +3,7 @@ package com.sak.wifi.Controller;
 import com.sak.wifi.dto.*;
 import com.sak.wifi.entity.User;
 import com.sak.wifi.service.AuthService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -75,4 +76,17 @@ public class AuthController {
         authService.resetPassword(request);
         return ResponseEntity.ok("Password updated Successfully");
     }
+
+    @PutMapping("/change-password")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<String> changePassword(
+            @Valid @RequestBody ChangePasswordRequest request,
+            Authentication authentication
+    ){
+            String email= authentication.getName();
+            authService.changePassword(email,request);
+            return ResponseEntity.ok("Password Changed Successfully");
+    }
+
 }
+

@@ -51,7 +51,10 @@ public class SecurityConfig {
                                 "/auth/**"
                         )
                         .permitAll()
-                        .requestMatchers("/auth/forgot-password",
+                        .requestMatchers("/auth/register/user",
+                                "/auth/login",
+                                "/auth/refresh",
+                                "/auth/forgot-password",
                                 "/auth/reset-password",
                                 "/auth/verify-email")
                         .permitAll()

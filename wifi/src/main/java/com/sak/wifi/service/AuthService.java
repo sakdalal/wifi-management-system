@@ -233,7 +233,47 @@ public class AuthService {
     }
 
     public void logout(User user){
+
         refreshTokenService.deleteByUser(user);
+    }
+
+    @Transactional
+    public void changePassword(String email,
+                               ChangePasswordRequest request){
+
+        User user= userRepository.findByEmail(email)
+                .orElseThrow(()->
+                    new RuntimeException("User not found")
+                );
+
+        if(!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())){
+            throw new RuntimeException("Current Password is incorrect");
+        }
+
+        if (!request.getNewPassword()
+                .equals(request.getConfirmPassword())) {
+
+            throw new RuntimeException(
+                    "New passwords do not match"
+            );
+        }
+
+        if (passwordEncoder.matches(
+                request.getNewPassword(),
+                user.getPassword()
+        )) {
+
+            throw new RuntimeException(
+                    "New password must be different from current password"
+            );
+        }
+
+        user.setPassword(
+                passwordEncoder.encode(request.getNewPassword())
+        );
+
+        userRepository.save(user);
+
     }
 
 }
